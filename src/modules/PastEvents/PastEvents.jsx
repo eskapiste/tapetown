@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { take } from 'rxjs/operators';
 import { soundcloudService } from '@services/soundcloud.service';
 import { bem, classes } from '@utils/formatters';
 import './PastEvents.scss';
@@ -9,16 +10,23 @@ export class PastEvents extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            count: 16,
             covers: []
         };
     }
 
     componentDidMount() {
-        soundcloudService.getObservable().subscribe({
-            next: (res) => {
-                this.setState((state) => ({ ...state, covers: res }))
-            }
-        })
+        soundcloudService
+            .getObservable()
+            .pipe(take(this.state.count))
+            .subscribe({
+                next: (res) => {
+                    this.setState((state) => ({
+                        ...state,
+                        covers: [...state.covers, res]
+                    }))
+                }
+            })
     }
 
     render() {
